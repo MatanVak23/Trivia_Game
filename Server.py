@@ -100,7 +100,7 @@ def broadcast():
         # print("Server in broadcast")
         udp_format = 'LBh'
         # tcp_port = 12351
-        tcp_port = 13118
+        tcp_port = 13119
         packed = pack(udp_format, 0xabcddcba, 0x2, tcp_port)
         try:
             UDP_socket.sendto(packed, ('<broadcast>', my_port))
