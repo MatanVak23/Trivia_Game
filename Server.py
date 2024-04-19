@@ -45,44 +45,6 @@ class Server:
         self.valid_answers = {"T": 0, "Y": 0, "1": 0, "F": 0, "N": 0, "0": 0}
         self.valid_answers_lock = threading.Lock()
         self.json_lock = threading.Lock()
-from Configuration import *
-#from TriviaGame import TriviaGame
-
-
-class Server:
-    """
-       Constructor
-       :return: None
-       """
-
-    def __init__(self):
-        self.UDP_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.my_ip = self.get_wifi_ip_windows()
-        self.my_port = 13117
-        self.broadcasting = False
-        self.game_on = False
-        self.number_of_clients = [0]
-        self.my_clients = []
-        self.lock = threading.Lock()
-        self.server_print_lock = threading.Lock()
-        self.server_print_counter = 0
-        self.tcp_port = None
-        self.TCP_socket_server = None
-        self.qa_pairs = self.read_questions_answers_file()
-        self.searching_client_flag = threading.Event()
-        self.game_over_event = threading.Event()
-        self.nick_names = None
-        self.begin_time = None
-        # Initialize statistics variables for the current session
-        self.number_of_games = 0
-        self.total_players = 0
-        self.total_game_time = 0
-        self.total_questions_asked = 0
-        self.fastest_game_time = float('inf')
-        self.longest_game_time = 0
-        self.valid_answers = {"T": 0, "Y": 0, "1": 0, "F": 0, "N": 0, "0": 0}
-        self.valid_answers_lock = threading.Lock()
-        self.json_lock = threading.Lock()
 
     def initialize_server(self):
         """
@@ -133,7 +95,27 @@ class Server:
         except OSError:
             return False
 
-
+    def start_server(self):
+        """
+        Start the main server loop.
+        :return: None
+        """
+        while True:
+            self.initialize_server()
+            # Start threads for broadcasting, searching clients, and handling client connections
+            t_broadcast = threading.Thread(target=self.broadcast)
+            t_searching_client = threading.Thread(target=self.searching_client)
+            t_handle_client_searching = threading.Thread(target=self.handle_client_while_searching)
+            t_broadcast.start()
+            t_searching_client.start()
+            t_handle_client_searching.start()  # Start the thread to handle clients while searching
+            self.searching_client_flag.set()
+            t_searching_client.join()
+            t_broadcast.join()
+            # Once the searching for clients thread finishes, start the game
+            self.broadcasting = True
+            self.begin_time = time.time()
+            ####TODO - finish the function
 
     def broadcast(self):
         """
@@ -217,36 +199,48 @@ class Server:
                     break
                 self.lock.release()
 
-
-
+    def handle_client_while_searching(self):
+        """
+         handle cases where client disconnect during the server search for client before the beginning of the game
+         :return: None
+         """
+        while not self.broadcasting and not self.game_on:
+            if not self.my_clients:
+                sleep(1)
+                continue
+            client_sockets = [client[0] for client in self.my_clients]
+            readable, _, exceptional = select.select(client_sockets, [], client_sockets, 1)
+            for sock in exceptional:
+                client = next((c for c in self.my_clients if c[0] == sock), None)
+                if client:
+                    print(
+                        COLORS_FOR_PLAYERS["error"] + f"Client {client[2]} disconnected abruptly." + COLORS_FOR_PLAYERS[
+                            "default"])
+                    with self.lock:
+                        self.my_clients.remove(client)
+                        self.number_of_clients[0] -= 1
+            for sock in readable:
+                try:
+                    data = sock.recv(1024, socket.MSG_PEEK)
+                    if not data:
+                        client = next((c for c in self.my_clients if c[0] == sock), None)
+                        if client:
+                            print(COLORS_FOR_PLAYERS["error"] + f"Client {client[2]} disconnected abruptly." +
+                                  COLORS_FOR_PLAYERS["default"])
+                            with self.lock:
+                                self.my_clients.remove(client)
+                                self.number_of_clients[0] -= 1
+                except ConnectionResetError:
+                    client = next((c for c in self.my_clients if c[0] == sock), None)
+                    if client:
+                        print(COLORS_FOR_PLAYERS[
+                                  "error"] + f"ConnectionResetError: Client {client[2]} disconnected abruptly." +
+                              COLORS_FOR_PLAYERS["default"])
+                        with self.lock:
+                            self.my_clients.remove(client)
+                            self.number_of_clients[0] -= 1
 
 
 if __name__ == "__main__":
-    UDP_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    my_ip = '192.168.111.1'
-    # my_port = 12350
-    my_port = 13117
-    UDP_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    UDP_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    UDP_socket.settimeout(0.2)
-    print("Server started, listening on IP address " + my_ip)
-    UDP_socket.bind((my_ip, my_port))
-
-    number_of_clients = [0]
-    my_clients = []
-    lock = threading.Lock()
-    tcp_port = 13118
-    # tcp_port = 12351
-    TCP_socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    TCP_socket_server.bind((my_ip, tcp_port))
-
-    t_broadcast = threading.Thread(target=broadcast)
-    t_searching_client = threading.Thread(target=searching_client, args=())
-    t_broadcast.start()
-    # qa_pairs = read_questions_answers_file()
-    t_searching_client.start()
-
-    t_searching_client.join()
-
-    # last_connection_time = time()
-    last_connection_time = time.time()
+    server = Server()
+    server.start_server()
