@@ -95,61 +95,87 @@ class Server:
         except OSError:
             return False
 
-def broadcast():
-    while True:
-        # print("Server in broadcast")
-        udp_format = 'LBh'
-        # tcp_port = 12351
-        tcp_port = 13119
-        packed = pack(udp_format, 0xabcddcba, 0x2, tcp_port)
-        try:
-            UDP_socket.sendto(packed, ('<broadcast>', my_port))
-        except OSError as e:
-            continue
-        sleep(1)
+    def broadcast(self):
+        """
+        Broadcast UDP packets to discover clients.
+        :return: None
+        """
+        while True:
+            if not self.broadcasting:
+                sleep(1)
+                print(COLORS_FOR_PLAYERS["Xavi Hernández"] + "Server in broadcast" + COLORS_FOR_PLAYERS["default"])
+                udp_format = 'LBH'
+                packed = pack(udp_format, 0xabcddcba, 0x2, self.tcp_port)
+                try:
+                    self.UDP_socket.sendto(packed, ('<broadcast>', self.my_port))
+                except OSError as e:
+                    continue
+            else:
+                break
 
-def searching_client():
-    global now  # Declare 'now' as a global variable
-    global number_of_clients
-    global my_clients
-    global last_connection_time
-
-    while number_of_clients[0] < 2:
-        TCP_socket_server.listen(2)
-        print("[*] Listening on %s:%d" % (my_ip, tcp_port))
-        client_tcp, address_tcp = TCP_socket_server.accept()
-        print("[*] Accepted connection from: %s:%d" % (address_tcp[0], address_tcp[1]))
-        request = client_tcp.recv(1024)
-        print("[*] Received: %s" % request)
-        client_tcp.send('ACK!'.encode('utf-8'))
-        client_name = client_tcp.recv(1024)
-        lock.acquire()
-        number_of_clients[0] += 1
-        my_clients.append((client_tcp, address_tcp, client_name.decode('utf-8')))
-        lock.release()
-        last_connection_time = time.time()
-
-    print("GOT TWO CONNECTIONS. WAITING FOR MORE PLAYERS...")
-
-    while True:
-        TCP_socket_server.listen(5)
-        readable, _, _ = select.select([TCP_socket_server], [], [], 4)  # Wait for new connections for 10 seconds//TODO
-        if readable:
-            client_tcp, address_tcp = TCP_socket_server.accept()
+    def searching_client(self):
+        """
+         Search for clients attempting to connect to the server.
+         :return: None
+         """
+        while self.number_of_clients[0] < 2:
+            self.TCP_socket_server.listen()
+            print("[*] Listening on %s:%d" % (self.my_ip, self.tcp_port))
+            client_tcp, address_tcp = self.TCP_socket_server.accept()
             print("[*] Accepted connection from: %s:%d" % (address_tcp[0], address_tcp[1]))
             request = client_tcp.recv(1024)
             print("[*] Received: %s" % request)
             client_tcp.send('ACK!'.encode('utf-8'))
-            client_name = client_tcp.recv(1024)
-            lock.acquire()
-            my_clients.append((client_tcp, address_tcp, client_name.decode('utf-8')))
-            lock.release()
-            last_connection_time = time.time()
-        else:
-            print("No new players joined within 10 seconds. Starting the game.")
-            break
+            try:
+                with self.lock:
+                    client_name = self.nick_names[0]
+                    del self.nick_names[0]  # Remove the first name from the list
+                    name_message = client_name
+                    client_tcp.send(name_message.encode('utf-8'))
+                    self.number_of_clients[0] += 1
+                    self.my_clients.append((client_tcp, address_tcp, client_name))
+            except ConnectionResetError:
+                print(
+                    COLORS_FOR_PLAYERS["error"] + "ConnectionResetError: Client disconnected before getting nickname." +
+                    COLORS_FOR_PLAYERS["default"])
+                continue
 
-    now = time.time()
+        print("GOT TWO CONNECTIONS. WAITING FOR MORE PLAYERS...")
+
+        while True and not self.broadcasting:
+            self.TCP_socket_server.listen()
+            readable, _, _ = select.select([self.TCP_socket_server], [], [], WAITING_CONNECT)
+            if readable:
+                client_tcp, address_tcp = self.TCP_socket_server.accept()
+                print("[*] Accepted connection from: %s:%d" % (address_tcp[0], address_tcp[1]))
+                request = client_tcp.recv(1024)
+                print("[*] Received: %s" % request)
+                client_tcp.send('ACK!'.encode('utf-8'))
+                try:
+                    with self.lock:
+                        client_name = self.nick_names[0]
+                        del self.nick_names[0]  # Remove the first name from the list
+                        name_message = client_name
+                        client_tcp.send(name_message.encode('utf-8'))
+                        self.number_of_clients[0] += 1
+                        self.my_clients.append((client_tcp, address_tcp, client_name))
+                except ConnectionResetError:
+                    print(COLORS_FOR_PLAYERS[
+                              "error"] + "ConnectionResetError: Client disconnected before getting nickname." +
+                          COLORS_FOR_PLAYERS["default"])
+                    continue
+                if self.number_of_clients[0] == 2:
+                    print("GOT TWO CONNECTIONS. WAITING FOR MORE PLAYERS...")
+            else:
+                self.lock.acquire()
+                if self.number_of_clients[0] >= 2:
+                    self.broadcasting = True
+                    sleep(1)
+                    print("No new players joined within 10 seconds. Starting the game.")
+                    self.broadcasting = True
+                    self.lock.release()
+                    break
+                self.lock.release()
 
 
 
@@ -175,13 +201,13 @@ if __name__ == "__main__":
     TCP_socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     TCP_socket_server.bind((my_ip, tcp_port))
 
-    t_broadcast = threading.Thread(target=broadcast)
-    t_searching_client = threading.Thread(target=searching_client, args=())
-    t_broadcast.start()
-    # qa_pairs = read_questions_answers_file()
-    t_searching_client.start()
-
-    t_searching_client.join()
+    # t_broadcast = threading.Thread(target=broadcast)
+    # t_searching_client = threading.Thread(target=searching_client, args=())
+    # t_broadcast.start()
+    # # qa_pairs = read_questions_answers_file()
+    # t_searching_client.start()
+    #
+    # t_searching_client.join()
 
     # last_connection_time = time()
     last_connection_time = time.time()
