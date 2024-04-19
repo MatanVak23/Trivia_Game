@@ -8,6 +8,44 @@ import threading
 import time
 import select
 from Configuration import *
+# from TriviaGame import TriviaGame
+
+
+class Server:
+    """
+       Constructor
+       :return: None
+       """
+
+    def __init__(self):
+        self.UDP_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.my_ip = self.get_wifi_ip_windows()
+        self.my_port = 13117
+        self.broadcasting = False
+        self.game_on = False
+        self.number_of_clients = [0]
+        self.my_clients = []
+        self.lock = threading.Lock()
+        self.server_print_lock = threading.Lock()
+        self.server_print_counter = 0
+        self.tcp_port = None
+        self.TCP_socket_server = None
+        self.qa_pairs = self.read_questions_answers_file()
+        self.searching_client_flag = threading.Event()
+        self.game_over_event = threading.Event()
+        self.nick_names = None
+        self.begin_time = None
+        # Initialize statistics variables for the current session
+        self.number_of_games = 0
+        self.total_players = 0
+        self.total_game_time = 0
+        self.total_questions_asked = 0
+        self.fastest_game_time = float('inf')
+        self.longest_game_time = 0
+        self.valid_answers = {"T": 0, "Y": 0, "1": 0, "F": 0, "N": 0, "0": 0}
+        self.valid_answers_lock = threading.Lock()
+        self.json_lock = threading.Lock()
+from Configuration import *
 #from TriviaGame import TriviaGame
 
 
