@@ -115,9 +115,6 @@ class Server:
             # Once the searching for clients thread finishes, start the game
             self.broadcasting = True
             self.begin_time = time.time()
-            # Once the searching for clients thread finishes, start the game
-            self.broadcasting = True
-            self.begin_time = time.time()
             self.start_game_for_all_players()
             t_handle_client_searching.join()
             self.reset_server_after_finish_game()
@@ -157,8 +154,7 @@ class Server:
                 if 'valid_answers' not in statistics_data:
                     statistics_data['valid_answers'] = {}
                 curr_game_time = time.time() - self.begin_time
-                statistics_data["total_game_time"] = statistics_data.get("total_game_time",
-                                                                         0) + self.total_game_time
+                statistics_data["total_game_time"] = statistics_data.get("total_game_time", 0) + self.total_game_time
                 self.total_game_time = statistics_data["total_game_time"]
                 statistics_data["total_questions_asked"] = statistics_data.get("total_questions_asked",
                                                                                0) + self.total_questions_asked
@@ -169,12 +165,10 @@ class Server:
                 else:
                     statistics_data["fastest_game_time"] = curr_game_time
                 self.fastest_game_time = statistics_data["fastest_game_time"]
-                statistics_data["longest_game_time"] = max(curr_game_time,
-                                                           statistics_data.get("longest_game_time", 0))
+                statistics_data["longest_game_time"] = max(curr_game_time, statistics_data.get("longest_game_time", 0))
                 self.longest_game_time = statistics_data["longest_game_time"]
                 for answer, count in self.valid_answers.items():
-                    statistics_data["valid_answers"][answer] = statistics_data["valid_answers"].get(answer,
-                                                                                                    0) + count
+                    statistics_data["valid_answers"][answer] = statistics_data["valid_answers"].get(answer, 0) + count
                     self.valid_answers[answer] = statistics_data["valid_answers"][answer]
                 # Save updated statistics to JSON file
                 with open(filename, "w") as file:
@@ -302,6 +296,7 @@ class Server:
                         with self.lock:
                             self.my_clients.remove(client)
                             self.number_of_clients[0] -= 1
+
     def start_game_for_all_players(self):
         """
         create for each client game thread and run them all simultaneity

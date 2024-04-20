@@ -1,0 +1,40 @@
+True or false: Is Lionel Messi a professional footballer? : Yes
+True or false: Did Brazil win the FIFA World Cup in 2002? : Yes
+True or false: Did England win the FIFA World Cup in 1966? : Yes
+True or false: Is Cristiano Ronaldo considered one of the greatest footballers of all time? : Yes
+True or false: Did Diego Maradona play for Argentina? : Yes
+True or false: Is the UEFA Champions League an annual football club competition? : Yes
+True or false: Is Pele considered one of the greatest footballers of all time? : Yes
+True or false: Did Germany win the FIFA World Cup in 2014? : Yes
+True or false: Is Manchester United a football club based in England? : Yes
+True or false: Did Italy win the FIFA World Cup in 2006? : Yes
+True or false: Is Neymar a professional footballer from Brazil? : Yes
+True or false: Did Spain win the FIFA World Cup in 2010? : Yes
+True or false: Is the Premier League the top-tier football league in England? : Yes
+True or false: Did France win the FIFA World Cup in 2018? : Yes
+True or false: Is Lionel Messi from Argentina? : Yes
+True or false: Did Liverpool FC win the Premier League in the 2019-2020 season? : Yes
+True or false: Is Cristiano Ronaldo from Portugal? : Yes
+True or false:Did Real Madrid win the UEFA Champions League in 2018? : Yes
+True or false:Is Lionel Messi currently playing for Paris Saint-Germain? : Yes
+True or false: Did Manchester City win the Premier League in the 2020-2021 season? : Yes
+True or false: Is Lionel Messi a professional basketball player? : No
+True or false: Did Brazil win the FIFA World Cup in 1800? : No
+True or false: Did England win the FIFA World Cup in 2000? : No
+True or false: Is Cristiano Ronaldo considered one of the worst footballers of all time? : No
+True or false: Did Diego Maradona play for Brazil? : No
+True or false: Is the UEFA Champions League an annual cricket tournament? : No
+True or false: Is Pele considered one of the worst footballers of all time? : No
+True or false: Did Germany win the FIFA World Cup in 1500? : No
+True or false: Is Manchester United a football club based in France? : No
+True or false: Did Italy win the FIFA World Cup in 1900? : No
+True or false: Is Neymar a professional footballer from Argentina? : No
+True or false: Did Spain win the FIFA World Cup in 1900? : No
+True or false: Is the Premier League the top-tier football league in France? : No
+True or false: Did France win the FIFA World Cup in 1800? : No
+True or false: Is Lionel Messi from Brazil? : No
+True or false: Did Liverpool FC win the Premier League in the 1800-1801 season? : No
+True or false: Is Cristiano Ronaldo from Spain? : No
+True or false: Did Real Madrid win the UEFA Champions League in 1800? : No
+True or false: Is Lionel Messi currently playing for Manchester City? : No
+True or false: Did Manchester City win the Premier League in the 1800-1801 season? : No
