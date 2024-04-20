@@ -17,7 +17,7 @@ class Client:
         :param
         :return: None
         """
-        self.server_port = 13117
+        self.server_port = UDP_PORT
         self.client_udp_socket = None
         self.client_tcp_socket = None
         self.client_name = None

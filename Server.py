@@ -20,12 +20,15 @@ class Server:
     def __init__(self):
         self.UDP_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.my_ip = self.get_wifi_ip_windows()
-        self.my_port = 13117
+        self.my_port = UDP_PORT
+        # broadcast as long as the game didnt started
         self.broadcasting = False
+        # flag to handle disconnected client until the game start
         self.game_on = False
         self.number_of_clients = [0]
         self.my_clients = []
         self.lock = threading.Lock()
+        # lock to limit the number times server print the question
         self.server_print_lock = threading.Lock()
         self.server_print_counter = 0
         self.tcp_port = None
@@ -184,7 +187,7 @@ class Server:
                 sleep(1)
                 print(COLORS_FOR_PLAYERS["Xavi Hernández"] + "Server in broadcast" + COLORS_FOR_PLAYERS["default"])
                 udp_format = 'LBH'
-                packed = pack(udp_format, 0xabcddcba, 0x2, self.tcp_port)
+                packed = pack(udp_format, PACKET_FORMAT, 0x2, self.tcp_port)
                 try:
                     self.UDP_socket.sendto(packed, ('<broadcast>', self.my_port))
                 except OSError as e:
