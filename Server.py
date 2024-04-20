@@ -205,7 +205,7 @@ class Server:
             print("[*] Listening on %s:%d" % (self.my_ip, self.tcp_port))
             client_tcp, address_tcp = self.TCP_socket_server.accept()
             print("[*] Accepted connection from: %s:%d" % (address_tcp[0], address_tcp[1]))
-            request = client_tcp.recv(1024)
+            request = client_tcp.recv(BUFFER_SIZE)
             print("[*] Received: %s" % request)
             client_tcp.send('ACK!'.encode('utf-8'))
             try:
@@ -230,7 +230,7 @@ class Server:
             if readable:
                 client_tcp, address_tcp = self.TCP_socket_server.accept()
                 print("[*] Accepted connection from: %s:%d" % (address_tcp[0], address_tcp[1]))
-                request = client_tcp.recv(1024)
+                request = client_tcp.recv(BUFFER_SIZE)
                 print("[*] Received: %s" % request)
                 client_tcp.send('ACK!'.encode('utf-8'))
                 try:

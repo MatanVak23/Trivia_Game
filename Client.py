@@ -48,7 +48,7 @@ class Client:
             self.client_udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             self.client_udp_socket.bind(('', self.server_port))
             print("Client started, listening for offer requests...")
-            data, addr = self.client_udp_socket.recvfrom(4096)
+            data, addr = self.client_udp_socket.recvfrom(BUFFER_SIZE)
             udp_format = 'LBH'
             message = unpack(udp_format, data)
             print("Received offer from " + addr[0] + ", attempting to connect...")
@@ -57,9 +57,9 @@ class Client:
                 self.client_tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.client_tcp_socket.connect((addr[0], message[2]))
                 self.client_tcp_socket.send("SYN".encode('utf-8'))
-                response = self.client_tcp_socket.recv(4096)
+                response = self.client_tcp_socket.recv(BUFFER_SIZE)
                 print(response.decode('utf-8'))
-                player_nick_name = self.client_tcp_socket.recv(4096)
+                player_nick_name = self.client_tcp_socket.recv(BUFFER_SIZE)
                 self.client_name = player_nick_name.decode('utf-8')
                 print(COLORS_FOR_PLAYERS[self.client_name] + f"Your Nickname is {self.client_name}" +
                       COLORS_FOR_PLAYERS["default"])
@@ -70,7 +70,7 @@ class Client:
 
                 while True:
                     try:
-                        response = self.client_tcp_socket.recv(4096)
+                        response = self.client_tcp_socket.recv(BUFFER_SIZE)
                         if not response:
                             break
                     except KeyboardInterrupt:
