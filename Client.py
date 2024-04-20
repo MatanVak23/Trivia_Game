@@ -42,6 +42,7 @@ class Client:
         :return:
         """
         while True:
+            time.sleep(1)
             self.client_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.client_udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.client_udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)

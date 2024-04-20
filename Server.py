@@ -119,7 +119,7 @@ class Server:
             t_handle_client_searching.join()
             self.reset_server_after_finish_game()
             # After the game ends, close TCP socket and restart server to look for new clients
-            self.TCP_socket_server.close()
+            # self.TCP_socket_server.close()
             self.TCP_socket_server = None
 
     def update_statistics_before_game(self):
