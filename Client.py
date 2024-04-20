@@ -88,7 +88,7 @@ class Client:
                         break
 
             except Exception as e:
-                print(COLORS_FOR_PLAYERS["error"] + "Error occurred:", str(e) + COLORS_FOR_PLAYERS["default"])
+                print(COLORS_FOR_PLAYERS["error"] + "Error occurred: The server was forcibly closed by the remote host" + COLORS_FOR_PLAYERS["default"])
 
     def game_over(self, input_thread):
         """
